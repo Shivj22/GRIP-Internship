@@ -1,7 +1,96 @@
-echo "# GRIP-Internship" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/Shivj22/GRIP-Internship.git
-git push -u origin main
+# NAME: SHIVSHANKAR JAISHEKAR
+
+# Prediction using Supervised ML using R.
+# Data Set: https://raw.githubusercontent.com/AdiPersonalWorks/Random/master/student_scores%20-%20student_scores.csv
+
+# Prediction of scores based on no. of hours of study
+
+
+# Import Data Set
+
+Marks_Scored<-read.csv("https://raw.githubusercontent.com/AdiPersonalWorks/Random/master/student_scores%20-%20student_scores.csv")
+View(Marks_Scored)
+
+# Lets check the relationship between both the variables
+# We will use a scatter plot graph to determine the relationship between both the variables
+
+library(ggplot2)
+
+ggplot(Marks_Scored,aes(x=Hours, y=Scores))+geom_point()+
+  geom_smooth(method = lm)+xlab("Hours")+ylab("Scores")
+
+
+# From the graph, we can see that both variables have a positive linear relationship
+
+# Lets divide the data set into 2 partitions
+# 1 - Training Data, 2 - Testing Data
+# The partition would be 75-25
+
+set.seed(200)
+
+index<-sample(nrow(Marks_Scored),0.75*nrow(Marks_Scored))
+
+# Training Data
+
+Training_Data<-Marks_Scored[index,]
+
+# Testing Data
+
+Testing_Data<-Marks_Scored[-index,]
+
+# Now, lets create a linear regression model using training data
+
+linear_model<-lm(Scores~Hours,data = Training_Data)
+summary(linear_model)
+# p-value: 4.695e-12 < 0.05
+# Hence, we can reject the null hypothesis that there is no significant relationship between both the variables
+
+# Implementing the model on training data to predict scores
+
+Training_Data$Predicted_Scores<-predict(linear_model,Training_Data)
+head(Training_Data)
+
+# Calculate RMSE
+
+library(Metrics)
+
+rmse(Training_Data$Predicted_Scores,Training_Data$Scores)
+
+# 5.427421 - Training Data
+
+# Implementing the model on the testing data
+
+Testing_Data$Predicted_Scores<-predict(linear_model,Testing_Data)
+head(Testing_Data)
+
+
+# Calculate RMSE
+
+rmse(Testing_Data$Predicted_Scores,Testing_Data$Scores)
+
+# 5.263304 - Testing Data
+
+
+# We can see that both the RMSEs are very similar or the difference between both the RMSEs is very less
+# Therefore, we can consider our model as a good fit
+
+
+# Now, we can use our model to predict the score if the number of hours of study are 9.25hrs/day
+
+# For that, we have to create a data frame containing the no of hours
+
+Marks<-as.data.frame(9.25)
+colnames(Marks)<- "Hours"
+Marks
+
+
+# Lets implement our model
+
+Marks$SCores<-predict(linear_model,Marks)
+
+Marks
+round(Marks$SCores,digits = 2)
+
+
+
+# Predicted Score for 9.25 hrs/day = 92.85
