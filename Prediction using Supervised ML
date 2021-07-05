@@ -92,5 +92,4 @@ Marks
 round(Marks$SCores,digits = 2)
 
 
-
 # Predicted Score for 9.25 hrs/day = 92.85
